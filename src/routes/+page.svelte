@@ -2,6 +2,7 @@
     let canvas: HTMLCanvasElement;
     let circles = $state(<number[][]>[]);
     const TOPBARHEIGHT = 50;
+    let t = 0;
 
     function generateCircle(x: number, y: number) {
         return [
@@ -12,15 +13,17 @@
             0,            // start angle
             Math.PI*2,    // end angle
             Math.random()*Math.PI*2, // direction
-            Math.random(), // magnitude
+            100+100*Math.random(), // magnitude
             x,            // og x
-            y             // og y
+            y,            // og y
+            0.001+0.001*Math.random() // drift
         ];
     }
 
     $effect(() => {
         canvas.width = canvas.offsetWidth;
         canvas.height = canvas.offsetHeight;
+        const smallerdimension = Math.min(canvas.width, canvas.height);
         const context = canvas.getContext('2d')!;
         context.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -30,8 +33,9 @@
             for (let n=i+1; n<circles.length; n++) {
                 let c2 = circles[n];
                 let distsqr = (c[1]-c2[1])*(c[1]-c2[1])+(c[2]-c2[2])*(c[2]-c2[2]);
-                if (distsqr < 26000) {
-                    let b = Math.min((26000-distsqr)*0.01, 255);
+                let maxdist = 0.05*smallerdimension*smallerdimension;
+                if (distsqr < maxdist) {
+                    let b = Math.min((maxdist-distsqr)*0.01, 255);
                     context.strokeStyle = "rgba(" + b + ", " + b + ", " + b + ", " + b + ")";
                     context.beginPath();
                     context.moveTo(c[1], c[2]);
@@ -61,6 +65,22 @@
             }
         }
     });
+
+    function updateCirclesPos() {
+        t++;
+        const offsetxconst = 0;
+        const offsetyconst = 0;
+        const magnitudeconst = 1;
+        circles.forEach(c => {
+            let magnitude = magnitudeconst * c[7];
+            let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
+            let offsety = offsetyconst + Math.cos(t*c[10])*magnitude*0.02;
+            c[1] = c[8] + (offsetx * Math.cos(c[6]) * magnitude) + (offsety * Math.sin(c[6]) * magnitude);
+            c[2] = c[9] + (offsetx * Math.cos(c[6]+Math.PI/2) * magnitude) + (offsety * Math.sin(c[6]+Math.PI/2) * magnitude);
+        })
+    }
+
+    setInterval(updateCirclesPos, 15);
 </script>
 
 <canvas bind:this={canvas} class="bg" id="bg"></canvas>
