@@ -69,6 +69,7 @@
             for (let i=0; i<N; i++) {
                 circles.push(generateCircle(W + 0.9*R*Math.cos(2*Math.PI*(i+0.5)/N), TOPBARHEIGHT + H + 0.9*R*Math.sin(2*Math.PI*(i+0.5)/N)));
             }
+            setInterval(updateCirclesPos, 15);
         }
     });
 
@@ -88,7 +89,8 @@
         }
         const offsetxconst = animx-0.5;
         const offsetyconst = animy-0.5;
-        const magnitudeconst = (1);
+        const largerdimension = Math.max(canvas.width, canvas.height);
+        const magnitudeconst = (largerdimension/1920);
         circles.forEach(c => {
             let magnitude = magnitudeconst * c[7];
             let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
@@ -102,8 +104,6 @@
         mousex = event.clientX/Math.max(canvas.width, 1);
         mousey = event.clientY/Math.max(canvas.height, 1);
     }
-
-    setInterval(updateCirclesPos, 15);
 </script>
 
 <canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
