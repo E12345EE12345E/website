@@ -1,5 +1,6 @@
 <script lang="ts">
     let canvas: HTMLCanvasElement;
+    let centerbutton: HTMLButtonElement;
     let circles = $state(<number[][]>[]);
     let mousex = 0;
     let mousey = 0;
@@ -7,6 +8,8 @@
     let animy = 0;
     let animspeeddefault = 0.005;
     let animtime = 0;
+    let overcentertime = 0;
+    let overcentermax = 0.5;
     const TOPBARHEIGHT = 50;
     let t = 0;
 
@@ -76,7 +79,7 @@
     function updateCirclesPos() {
         t++;
         let animdist = Math.sqrt((mousex-animx)*(mousex-animx)+(mousey-animy)*(mousey-animy));
-        let animspeed = animspeeddefault*Math.min(1+0.04*animtime,4)*Math.max(Math.min(animdist*2, 1), 0.2);
+        let animspeed = animspeeddefault*Math.min(1+0.04*animtime,4)*Math.max(Math.min(animdist*3, 1), 0.1);
         if (animdist > animspeed) {
             animtime++;
             let animangle = Math.atan2(mousey-animy,mousex-animx);
@@ -90,7 +93,7 @@
         const offsetxconst = animx-0.5;
         const offsetyconst = animy-0.5;
         const largerdimension = Math.max(canvas.width, canvas.height);
-        const magnitudeconst = (largerdimension/1920);
+        const magnitudeconst = (largerdimension/1920)*(1-Math.min(overcentertime*0.001, overcentermax));
         circles.forEach(c => {
             let magnitude = magnitudeconst * c[7];
             let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
@@ -107,3 +110,6 @@
 </script>
 
 <canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
+<!-- svelte-ignore a11y_consider_explicit_label -->
+<!-- svelte-ignore a11y_missing_attribute -->
+<button bind:this={centerbutton} class="imagecontainer"><img src="favicon.png"></button>

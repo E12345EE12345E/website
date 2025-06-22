@@ -1,0 +1,1 @@
+import{e as S,r as c,c as h,q as k,S as q}from"./BST4eR-o.js";function t(r,i){return r===i||(r==null?void 0:r[q])===i}function A(r={},i,a,T){return S(()=>{var f,s;return c(()=>{f=s,s=[],h(()=>{r!==a(...s)&&(i(r,...s),f&&t(a(...f),r)&&i(null,...f))})}),()=>{k(()=>{s&&t(a(...s),r)&&i(null,...s)})}}),r}export{A as b};

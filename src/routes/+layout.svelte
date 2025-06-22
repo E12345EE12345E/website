@@ -24,6 +24,12 @@
         width: 100vw;
         height: 100vh;
     }
+    :global(button.imagecontainer) {
+        border: none;
+        background: none;
+        padding: 0;
+        z-index: 1000;
+    }
     .navbar {
         display: flex;
         width: 100%;
