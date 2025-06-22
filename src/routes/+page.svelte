@@ -1,6 +1,12 @@
 <script lang="ts">
     let canvas: HTMLCanvasElement;
     let circles = $state(<number[][]>[]);
+    let mousex = 0;
+    let mousey = 0;
+    let animx = 0;
+    let animy = 0;
+    let animspeeddefault = 0.005;
+    let animtime = 0;
     const TOPBARHEIGHT = 50;
     let t = 0;
 
@@ -16,7 +22,7 @@
             100+100*Math.random(), // magnitude
             x,            // og x
             y,            // og y
-            0.001+0.001*Math.random() // drift
+            (0.001+0.001*Math.random())*(Math.random()>0.5?1:-1) // drift
         ];
     }
 
@@ -33,7 +39,7 @@
             for (let n=i+1; n<circles.length; n++) {
                 let c2 = circles[n];
                 let distsqr = (c[1]-c2[1])*(c[1]-c2[1])+(c[2]-c2[2])*(c[2]-c2[2]);
-                let maxdist = 0.05*smallerdimension*smallerdimension;
+                let maxdist = 0.075*smallerdimension*smallerdimension;
                 if (distsqr < maxdist) {
                     let b = Math.min((maxdist-distsqr)*0.01, 255);
                     context.strokeStyle = "rgba(" + b + ", " + b + ", " + b + ", " + b + ")";
@@ -68,9 +74,21 @@
 
     function updateCirclesPos() {
         t++;
-        const offsetxconst = 0;
-        const offsetyconst = 0;
-        const magnitudeconst = 1;
+        let animdist = Math.sqrt((mousex-animx)*(mousex-animx)+(mousey-animy)*(mousey-animy));
+        let animspeed = animspeeddefault*Math.min(1+0.04*animtime,4)*Math.max(Math.min(animdist*2, 1), 0.2);
+        if (animdist > animspeed) {
+            animtime++;
+            let animangle = Math.atan2(mousey-animy,mousex-animx);
+            animx += Math.cos(animangle) * animspeed;
+            animy += Math.sin(animangle) * animspeed;
+        } else {
+            animx = mousex;
+            animy = mousey;
+            animtime = 0;
+        }
+        const offsetxconst = animx-0.5;
+        const offsetyconst = animy-0.5;
+        const magnitudeconst = (1);
         circles.forEach(c => {
             let magnitude = magnitudeconst * c[7];
             let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
@@ -80,7 +98,12 @@
         })
     }
 
+    function onpointermove(event: PointerEvent) {
+        mousex = event.clientX/Math.max(canvas.width, 1);
+        mousey = event.clientY/Math.max(canvas.height, 1);
+    }
+
     setInterval(updateCirclesPos, 15);
 </script>
 
-<canvas bind:this={canvas} class="bg" id="bg"></canvas>
+<canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
