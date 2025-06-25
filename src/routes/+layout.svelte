@@ -5,8 +5,8 @@
 <div class="navbar" id="header">
     <div class="navbuttons">
         <a href="./" class="navbutton">Home</a>
-        <a href="./" class="navbutton">Projects</a>
-        <a href="./" class="navbutton">Links</a>
+        <a href="./projects" class="navbutton">Projects</a>
+        <a href="./links" class="navbutton">Links</a>
     </div>
 </div>
 
@@ -28,6 +28,7 @@
         border: none;
         background: none;
         padding: 0;
+        position: absolute;
         z-index: 1000;
     }
     .navbar {

@@ -36,6 +36,11 @@
         const context = canvas.getContext('2d')!;
         context.clearRect(0, 0, canvas.width, canvas.height);
 
+        // Center Button
+        const centerbuttonsize = 128;
+        centerbutton.style.left = (canvas.width/2 - centerbuttonsize/2) + "px";
+        centerbutton.style.top = (canvas.height/2 - centerbuttonsize/2 + TOPBARHEIGHT/2) + "px";
+
         // Render circles
         for (let i=0; i<circles.length; i++) {
             let c = circles[i];
@@ -107,9 +112,13 @@
         mousex = event.clientX/Math.max(canvas.width, 1);
         mousey = event.clientY/Math.max(canvas.height, 1);
     }
+
+    function centerbuttonclicked(event: MouseEvent) {
+        console.log(event);
+    }
 </script>
 
-<canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
 <!-- svelte-ignore a11y_consider_explicit_label -->
 <!-- svelte-ignore a11y_missing_attribute -->
-<button bind:this={centerbutton} class="imagecontainer"><img src="favicon.png"></button>
+<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer"><img src="favicon.png"></button>
+<canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
