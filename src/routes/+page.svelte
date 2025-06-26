@@ -4,12 +4,14 @@
     let circles = $state(<number[][]>[]);
     let mousex = 0;
     let mousey = 0;
+    let rawmousex = 0;
+    let rawmousey = 0;
     let animx = 0;
     let animy = 0;
     let animspeeddefault = 0.005;
     let animtime = 0;
     let overcentertime = 0;
-    let overcentermax = 0.5;
+    let overcentermax = 0.4;
     const TOPBARHEIGHT = 50;
     let t = 0;
 
@@ -95,10 +97,22 @@
             animy = mousey;
             animtime = 0;
         }
+        const W = canvas.width/2;
+        const H = (canvas.height-TOPBARHEIGHT)/2;
+        const R = 0.75*Math.min(W, H);
+        const distx = W - rawmousex;
+        const disty = TOPBARHEIGHT + H - rawmousey;
+        overcentertime *= 0.99;
+        overcentertime -= 0.001;
+        if (distx*distx + disty*disty < R*R) {
+            overcentertime += 0.005*(1-((distx*distx)/(R*R)+(disty*disty)/(R*R)));
+        }
+        overcentertime = Math.min(Math.max(overcentertime, 0), overcentermax);
+        console.log(overcentertime);
         const offsetxconst = animx-0.5;
         const offsetyconst = animy-0.5;
         const largerdimension = Math.max(canvas.width, canvas.height);
-        const magnitudeconst = (largerdimension/1920)*(1-Math.min(overcentertime*0.001, overcentermax));
+        const magnitudeconst = (largerdimension/1920)*(1-Math.min(overcentertime, overcentermax));
         circles.forEach(c => {
             let magnitude = magnitudeconst * c[7];
             let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
@@ -111,6 +125,8 @@
     function onpointermove(event: PointerEvent) {
         mousex = event.clientX/Math.max(canvas.width, 1);
         mousey = event.clientY/Math.max(canvas.height, 1);
+        rawmousex = event.clientX;
+        rawmousey = event.clientY;
     }
 
     function centerbuttonclicked(event: MouseEvent) {
