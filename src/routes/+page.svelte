@@ -11,7 +11,8 @@
     let animspeeddefault = 0.005;
     let animtime = 0;
     let overcentertime = 0;
-    let overcentermax = 0.4;
+    let overcentermax = 0.5;
+    let lockovercenter = false;
     const TOPBARHEIGHT = 50;
     let t = 0;
 
@@ -104,8 +105,10 @@
         const disty = TOPBARHEIGHT + H - rawmousey;
         overcentertime *= 0.99;
         overcentertime -= 0.001;
-        if (distx*distx + disty*disty < R*R) {
-            overcentertime += 0.005*(1-((distx*distx)/(R*R)+(disty*disty)/(R*R)));
+        if (lockovercenter) {
+            overcentertime += 0.015;
+        } else if (distx*distx + disty*disty < R*R) {
+            overcentertime += 0.006*(1-((distx*distx)/(R*R)+(disty*disty)/(R*R)));
         }
         overcentertime = Math.min(Math.max(overcentertime, 0), overcentermax);
         console.log(overcentertime);
@@ -131,6 +134,8 @@
 
     function centerbuttonclicked(event: MouseEvent) {
         console.log(event);
+        overcentermax = 1;
+        lockovercenter = true;
     }
 </script>
 
