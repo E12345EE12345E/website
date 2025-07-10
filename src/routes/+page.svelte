@@ -12,7 +12,11 @@
     let animtime = 0;
     let overcentertime = 0;
     let overcentermax = 0.5;
+    let overcenteraccel = 0;
     let lockovercenter = false;
+    let screenshakemagnitude = 0;
+    let screenshaketime = 0;
+    let aboutmestate = 0;
     const TOPBARHEIGHT = 50;
     let t = 0;
 
@@ -106,21 +110,31 @@
         overcentertime *= 0.99;
         overcentertime -= 0.001;
         if (lockovercenter) {
-            overcentertime += 0.015;
+            overcenteraccel += 0.01+(0.01*overcentertime);
+            overcentertime += 0.006 + 0.25*overcenteraccel*overcenteraccel*overcenteraccel;
+            if (overcentertime >= 1 && aboutmestate == 0) {
+                screenshakemagnitude = 20;
+                aboutmestate = 1;
+                centerbutton.remove();
+            }
+            if (aboutmestate == 1) {
+                screenshaketime++;
+                screenshakemagnitude *= 0.9;
+            }
         } else if (distx*distx + disty*disty < R*R) {
             overcentertime += 0.006*(1-((distx*distx)/(R*R)+(disty*disty)/(R*R)));
         }
         overcentertime = Math.min(Math.max(overcentertime, 0), overcentermax);
-        console.log(overcentertime);
         const offsetxconst = animx-0.5;
         const offsetyconst = animy-0.5;
         const largerdimension = Math.max(canvas.width, canvas.height);
         const magnitudeconst = (largerdimension/1920)*(1-Math.min(overcentertime, overcentermax));
         circles.forEach(c => {
             let magnitude = magnitudeconst * c[7];
+            console.log(magnitude);
             let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
             let offsety = offsetyconst + Math.cos(t*c[10])*magnitude*0.02;
-            c[1] = c[8] + (offsetx * Math.cos(c[6]) * magnitude) + (offsety * Math.sin(c[6]) * magnitude);
+            c[1] = c[8] + (offsetx * Math.cos(c[6]) * magnitude) + (offsety * Math.sin(c[6]) * magnitude) + (screenshakemagnitude * Math.sin(screenshaketime));
             c[2] = c[9] + (offsetx * Math.cos(c[6]+Math.PI/2) * magnitude) + (offsety * Math.sin(c[6]+Math.PI/2) * magnitude);
         })
     }
@@ -133,13 +147,17 @@
     }
 
     function centerbuttonclicked(event: MouseEvent) {
-        console.log(event);
-        overcentermax = 1;
-        lockovercenter = true;
+        if (!lockovercenter) {
+            console.log(event);
+            overcentermax = 1;
+            overcenteraccel = 0;
+            lockovercenter = true;
+        }
+        centerbutton.style.opacity = "0";
     }
 </script>
 
 <!-- svelte-ignore a11y_consider_explicit_label -->
 <!-- svelte-ignore a11y_missing_attribute -->
-<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer"><img src="favicon.png"></button>
+<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer fadeout"><img src="favicon.png" class="notdraggable"></button>
 <canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>

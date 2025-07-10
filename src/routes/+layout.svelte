@@ -31,6 +31,19 @@
         position: absolute;
         z-index: 1000;
     }
+    :global(button.imagecontainer:hover) {
+        cursor: pointer;
+    }
+    :global(.notdraggable) {
+        -webkit-user-drag: none;
+        user-select: none;
+        -moz-user-select: none;
+        -webkit-user-select: none;
+        -ms-user-select: none;
+    }
+    :global(.fadeout) {
+        transition: opacity 0.5s ease-out;
+    }
     .navbar {
         display: flex;
         width: 100%;
