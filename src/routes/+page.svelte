@@ -1,6 +1,7 @@
 <script lang="ts">
     let canvas: HTMLCanvasElement;
     let centerbutton: HTMLButtonElement;
+    let aboutmediv: HTMLDivElement;
     let circles = $state(<number[][]>[]);
     let mousex = 0;
     let mousey = 0;
@@ -17,7 +18,9 @@
     let screenshakemagnitude = 0;
     let screenshaketime = 0;
     let aboutmestate = 0;
+    let aboutmedrift = 0;
     const TOPBARHEIGHT = 50;
+    const CIRCLENUM = 16;
     let t = 0;
 
     function generateCircle(x: number, y: number) {
@@ -37,8 +40,12 @@
     }
 
     $effect(() => {
-        canvas.width = canvas.offsetWidth;
-        canvas.height = canvas.offsetHeight;
+        redrawCanvas();
+    });
+
+    function redrawCanvas() {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
         const smallerdimension = Math.min(canvas.width, canvas.height);
         const context = canvas.getContext('2d')!;
         context.clearRect(0, 0, canvas.width, canvas.height);
@@ -77,16 +84,21 @@
             const W = canvas.width/2;
             const H = (canvas.height-TOPBARHEIGHT)/2;
             const R = Math.min(W, H);
-            const N = 16;
+            const N = CIRCLENUM;
             for (let i=0; i<N; i++) {
-                circles.push(generateCircle(W + 0.75*R*Math.cos(2*Math.PI*i/N), TOPBARHEIGHT + H + 0.75*R*Math.sin(2*Math.PI*i/N)));
+                circles.push(generateCircle(innerCircleX(W, H, R, N, i), innerCircleY(W, H, R, N, i)));
             }
             for (let i=0; i<N; i++) {
-                circles.push(generateCircle(W + 0.9*R*Math.cos(2*Math.PI*(i+0.5)/N), TOPBARHEIGHT + H + 0.9*R*Math.sin(2*Math.PI*(i+0.5)/N)));
+                circles.push(generateCircle(outerCircleX(W, H, R, N, i), outerCircleY(W, H, R, N, i)));
             }
             setInterval(updateCirclesPos, 15);
         }
-    });
+    }
+
+    function innerCircleX(W: number, H: number, R: number, N:number, i:number) { return W + 0.75*R*Math.cos(2*Math.PI*i/N); }
+    function innerCircleY(W: number, H: number, R: number, N:number, i:number) { return TOPBARHEIGHT + H + 0.75*R*Math.sin(2*Math.PI*i/N); }
+    function outerCircleX(W: number, H: number, R: number, N:number, i:number) { return W + 0.9*R*Math.cos(2*Math.PI*(i+0.5)/N); }
+    function outerCircleY(W: number, H: number, R: number, N:number, i:number) { return TOPBARHEIGHT + H + 0.9*R*Math.sin(2*Math.PI*(i+0.5)/N); }
 
     function updateCirclesPos() {
         t++;
@@ -120,6 +132,13 @@
             if (aboutmestate == 1) {
                 screenshaketime++;
                 screenshakemagnitude *= 0.9;
+                if (screenshakemagnitude < 0.1) {
+                    screenshakemagnitude = 0;
+                    aboutmestate = 2;
+                }
+            }
+            if (aboutmestate >= 1) {
+                aboutmedrift = Math.min(aboutmedrift+0.001, 0.15);
             }
         } else if (distx*distx + disty*disty < R*R) {
             overcentertime += 0.006*(1-((distx*distx)/(R*R)+(disty*disty)/(R*R)));
@@ -128,15 +147,16 @@
         const offsetxconst = animx-0.5;
         const offsetyconst = animy-0.5;
         const largerdimension = Math.max(canvas.width, canvas.height);
-        const magnitudeconst = (largerdimension/1920)*(1-Math.min(overcentertime, overcentermax));
+        const magnitudeconst = (largerdimension/1920)*(1-Math.min(overcentertime, overcentermax) + aboutmedrift);
+        const driftspeedmult = (aboutmestate>=1)?8:1;
         circles.forEach(c => {
             let magnitude = magnitudeconst * c[7];
             console.log(magnitude);
-            let offsetx = offsetxconst + Math.sin(t*c[10])*magnitude*0.02;
-            let offsety = offsetyconst + Math.cos(t*c[10])*magnitude*0.02;
+            let offsetx = offsetxconst + Math.sin(t*c[10]*driftspeedmult)*magnitude*0.02;
+            let offsety = offsetyconst + Math.cos(t*c[10]*driftspeedmult)*magnitude*0.02;
             c[1] = c[8] + (offsetx * Math.cos(c[6]) * magnitude) + (offsety * Math.sin(c[6]) * magnitude) + (screenshakemagnitude * Math.sin(screenshaketime));
             c[2] = c[9] + (offsetx * Math.cos(c[6]+Math.PI/2) * magnitude) + (offsety * Math.sin(c[6]+Math.PI/2) * magnitude);
-        })
+        });
     }
 
     function onpointermove(event: PointerEvent) {
@@ -144,6 +164,25 @@
         mousey = event.clientY/Math.max(canvas.height, 1);
         rawmousex = event.clientX;
         rawmousey = event.clientY;
+    }
+
+    function handleResize() {
+        console.log("window resized");
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const W = canvas.width/2;
+        const H = (canvas.height-TOPBARHEIGHT)/2;
+        const R = Math.min(W, H);
+        for (let i=0; i<CIRCLENUM; i++) {
+            circles[i][8] = innerCircleX(W, H, R, CIRCLENUM, i);
+            circles[i][9] = innerCircleY(W, H, R, CIRCLENUM, i);
+        }
+        for (let i=CIRCLENUM; i<CIRCLENUM*2; i++) {
+            circles[i][8] = outerCircleX(W, H, R, CIRCLENUM, i);
+            circles[i][9] = outerCircleY(W, H, R, CIRCLENUM, i);
+        }
+        updateCirclesPos();
     }
 
     function centerbuttonclicked(event: MouseEvent) {
@@ -157,7 +196,18 @@
     }
 </script>
 
-<!-- svelte-ignore a11y_consider_explicit_label -->
-<!-- svelte-ignore a11y_missing_attribute -->
-<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer fadeout"><img src="favicon.png" class="notdraggable"></button>
+<svelte:window onresize={handleResize} />
+<div bind:this={aboutmediv} class="aboutme">
+    a
+</div>
+<!-- svelte-ignore a11y_consider_explicit_label --> <!-- svelte-ignore a11y_missing_attribute -->
+<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer fadeout"><img src="favicon.png" class="notdraggable">asdf</button>
 <canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
+
+<style>
+    div.aboutme {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+</style>
