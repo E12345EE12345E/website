@@ -1,7 +1,8 @@
 <script lang="ts">
     let canvas: HTMLCanvasElement;
     let centerbutton: HTMLButtonElement;
-    let aboutmediv: HTMLDivElement;
+    let aboutmefig: HTMLElement;
+    let aboutmeimg: HTMLImageElement;
     let circles = $state(<number[][]>[]);
     let mousex = 0;
     let mousey = 0;
@@ -54,6 +55,13 @@
         const centerbuttonsize = 128;
         centerbutton.style.left = (canvas.width/2 - centerbuttonsize/2) + "px";
         centerbutton.style.top = (canvas.height/2 - centerbuttonsize/2 + TOPBARHEIGHT/2) + "px";
+
+        // About Me
+        const aboutmesize = smallerdimension*0.35;
+        aboutmefig.style.width = aboutmesize + "px";
+        aboutmeimg.style.width = aboutmesize + "px";
+        aboutmefig.style.left = (canvas.width/2 - aboutmesize/2) + "px";
+        aboutmefig.style.top = (canvas.height/2 - aboutmesize*0.65 + TOPBARHEIGHT/2) + "px";
 
         // Render circles
         for (let i=0; i<circles.length; i++) {
@@ -135,6 +143,7 @@
                 if (screenshakemagnitude < 0.1) {
                     screenshakemagnitude = 0;
                     aboutmestate = 2;
+                    aboutmefig.style.opacity = "1";
                 }
             }
             if (aboutmestate >= 1) {
@@ -197,17 +206,28 @@
 </script>
 
 <svelte:window onresize={handleResize} />
-<div bind:this={aboutmediv} class="aboutme">
-    a
-</div>
-<!-- svelte-ignore a11y_consider_explicit_label --> <!-- svelte-ignore a11y_missing_attribute -->
-<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer fadeout"><img src="favicon.png" class="notdraggable">asdf</button>
+<figure bind:this={aboutmefig} class="aboutme">
+    <!-- svelte-ignore a11y_missing_attribute -->
+    <img src="favicon.png" bind:this={aboutmeimg} class="aboutme">
+    <figcaption>text that goes under the image to explain the image except i dont have an image to explain so the text is not explaining anything</figcaption>
+</figure>
+<!-- svelte-ignore a11y_consider_explicit_label -->
+<!-- svelte-ignore a11y_missing_attribute -->
+<button bind:this={centerbutton} onclick={centerbuttonclicked} {onpointermove} class="imagecontainer fadeout"><img src="favicon.png" class="notdraggable"></button>
 <canvas bind:this={canvas} {onpointermove} class="bg" id="bg"></canvas>
 
 <style>
-    div.aboutme {
-        display: flex;
-        justify-content: center;
-        align-items: center;
+    .aboutme {
+        width: 200px;
+    }
+    figure.aboutme {
+        position: absolute;
+        margin: 0;
+        opacity: 0;
+        transition: opacity 2s ease-in-out;
+    }
+    figcaption {
+        max-width: 100%;
+        text-align: center;
     }
 </style>

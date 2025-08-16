@@ -1,0 +1,1 @@
+import{f as t,b as a}from"../chunks/B-XsS8Qi.js";import"../chunks/BRGP1eGe.js";var e=t('<p class="svelte-btpwne">why you lookin at my test page</p>');function n(o){var p=e();a(o,p)}export{n as component};
